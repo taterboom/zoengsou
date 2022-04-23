@@ -1,18 +1,64 @@
 import { useEffect, useRef, useState } from "react"
-import { SketchPicker } from "react-color"
 import shallow from "zustand/shallow"
 import useStore from "../../store/editorStore"
 import { selectActiveSurface } from "../../store/editorStore/selectors"
 import usePaletteStore from "../../store/palette/store"
-import Button from "../Button"
+import Button from "../UI/Button"
+import EditorComponentWrapper from "../EditorComponentWrapper"
+import ColorPicker from "../UI/ColorPicker"
+
+const setCursor = (cursor: string) => {
+  const stageContainer = document.getElementById("stage-container")
+  console.log(cursor)
+  if (!stageContainer) return
+  stageContainer.style.cursor = cursor
+}
 
 const TOOL_PENCIL = "TOOL_PENCIL"
 const TOOL_ERASER = "TOOL_ERASER"
 const TOOL_FILL = "TOOL_FILL"
+const TOOL_GRAB = "TOOL_GRAB"
 
 type ToolButtonProps = {
   checked: boolean
   onClick: () => any
+}
+
+const ToolButtonGrab: React.FC<ToolButtonProps> = ({ checked, onClick }) => {
+  const move = useRef(useStore((state) => state.positionMove))
+  const checkedRef = useRef(checked)
+  checkedRef.current = checked
+
+  useEffect(() => {
+    const stageContainer = document.getElementById("stage-container")
+    const stage = document.getElementById("stage")
+    if (!stageContainer || !stage) return
+    const onMousedown = () => {
+      if (!checkedRef.current) return
+      setCursor("grabbing")
+      stageContainer.addEventListener("mousemove", onMousemove)
+      document.addEventListener("mouseup", onMouseup)
+    }
+    const onMouseup = () => {
+      if (checkedRef.current) {
+        setCursor("grab")
+      }
+      stageContainer.removeEventListener("mousemove", onMousemove)
+      document.removeEventListener("mouseup", onMouseup)
+    }
+    const onMousemove = (e: MouseEvent) => {
+      move.current({
+        x: e.movementX,
+        y: e.movementY,
+      })
+    }
+    stageContainer.addEventListener("mousedown", onMousedown)
+    return () => {
+      stageContainer.removeEventListener("mousedown", onMousedown)
+    }
+  }, [])
+
+  return <Button onClick={onClick}>Grab {checked + ""}</Button>
 }
 
 const ToolButtonPencel: React.FC<ToolButtonProps> = ({ checked, onClick }) => {
@@ -94,21 +140,10 @@ const ToolButtonFill: React.FC<ToolButtonProps> = ({ checked, onClick }) => {
 const PaletteButton: React.FC = () => {
   const color = usePaletteStore((state) => state.color)
   const updateColor = usePaletteStore((state) => state.updateColor)
-  return (
-    <div className="group relative">
-      <Button>
-        <div className="w-[32px] h-[32px]" style={{ background: color }}></div>
-      </Button>
-      <SketchPicker
-        className="absolute left-full top-0 hidden group-hover:block"
-        color={color}
-        onChange={(e) => updateColor(e.hex)}
-      ></SketchPicker>
-    </div>
-  )
+  return <ColorPicker value={color} onChange={(v) => updateColor(v)}></ColorPicker>
 }
 
-const ToolBarContainer: React.FC = ({}) => {
+const ToolBarContainer: React.FC<{ active: boolean }> = ({ active }) => {
   const [currentToolId, setCurrentToolId] = useState<string>(TOOL_PENCIL)
 
   const onCheck = (id: string) => {
@@ -119,23 +154,45 @@ const ToolBarContainer: React.FC = ({}) => {
     }
   }
 
-  return (
-    <div className="fixed top-20 left-0 w-12 h-[360px] bg-white">
-      <ToolButtonPencel
-        checked={currentToolId === TOOL_PENCIL}
-        onClick={() => onCheck(TOOL_PENCIL)}
-      ></ToolButtonPencel>
-      <ToolButtonEraser
-        checked={currentToolId === TOOL_ERASER}
-        onClick={() => onCheck(TOOL_ERASER)}
-      ></ToolButtonEraser>
-      <ToolButtonFill
-        checked={currentToolId === TOOL_FILL}
-        onClick={() => onCheck(TOOL_FILL)}
-      ></ToolButtonFill>
+  useEffect(() => {
+    const cursor: { [x: string]: string } = {
+      [TOOL_GRAB]: "grab",
+      // [TOOL_PENCIL]: "grab",
+      // [TOOL_ERASER]: "grab",
+      // [TOOL_FILL]: "grab",
+    }
+    if (currentToolId in cursor) {
+      setCursor(cursor[currentToolId])
+    } else {
+      setCursor("default")
+    }
+  }, [currentToolId])
 
-      <PaletteButton></PaletteButton>
-    </div>
+  return (
+    <EditorComponentWrapper active={active} direction="right">
+      <div className="fixed top-0 left-0 h-full pt-20">
+        <div className="w-12 h-[360px] bg-white">
+          <ToolButtonGrab
+            checked={currentToolId === TOOL_GRAB}
+            onClick={() => onCheck(TOOL_GRAB)}
+          ></ToolButtonGrab>
+          <ToolButtonPencel
+            checked={currentToolId === TOOL_PENCIL}
+            onClick={() => onCheck(TOOL_PENCIL)}
+          ></ToolButtonPencel>
+          <ToolButtonEraser
+            checked={currentToolId === TOOL_ERASER}
+            onClick={() => onCheck(TOOL_ERASER)}
+          ></ToolButtonEraser>
+          <ToolButtonFill
+            checked={currentToolId === TOOL_FILL}
+            onClick={() => onCheck(TOOL_FILL)}
+          ></ToolButtonFill>
+
+          <PaletteButton></PaletteButton>
+        </div>
+      </div>
+    </EditorComponentWrapper>
   )
 }
 

@@ -30,6 +30,7 @@ type CreateZoomBlockerOptions = {
 export const createZoomBlocker = (options: CreateZoomBlockerOptions = {}) => {
   const { onZoom } = options
   if (document) {
+    // TODO 操作面板上下机器快捷键
     window.addEventListener(
       "wheel",
       function (e) {
@@ -39,7 +40,9 @@ export const createZoomBlocker = (options: CreateZoomBlockerOptions = {}) => {
       },
       { passive: false }
     )
+    // TODO 快捷键系统
     document.addEventListener("keydown", function (e) {
+      console.log(e.code)
       if (checkPreconditions(e) && e.code in ZOOM_CODE) {
         e.preventDefault()
         if (onZoom) {
@@ -50,14 +53,21 @@ export const createZoomBlocker = (options: CreateZoomBlockerOptions = {}) => {
   }
 }
 
-const useBlockZoom = (options?: CreateZoomBlockerOptions) => {
-  const isMounted = useRef(false)
+const useBlockWheel = (cb?: (e: WheelEvent) => any) => {
+  const cbRef = useRef(cb)
+  cbRef.current = cb
   useEffect(() => {
-    if (!isMounted.current) {
-      createZoomBlocker(options)
+    if (document) {
+      window.addEventListener(
+        "wheel",
+        function (e) {
+          e.preventDefault()
+          cbRef.current?.(e)
+        },
+        { passive: false }
+      )
     }
-    isMounted.current = true
-  }, [options])
+  }, [])
 }
 
-export default useBlockZoom
+export default useBlockWheel

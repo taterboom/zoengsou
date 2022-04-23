@@ -1,6 +1,7 @@
 import { nanoid } from "nanoid"
 import { range } from "ramda"
 import {
+  DEFAULT_ANIMATION_INTERVAL,
   DEFAULT_HEIGHT,
   DEFAULT_RATIO,
   DEFAULT_RULER_COLOR,
@@ -62,11 +63,18 @@ export const initDataBase = (options?: { example?: boolean; size?: Size }): Data
     count: initialSize.width * initialSize.height,
   })
   return {
+    position: {
+      x: 0,
+      y: 0,
+    },
     metaData: {
       size: initialSize,
       scale: DEFAULT_SCALE,
       ratio: DEFAULT_RATIO,
-      rulerColor: DEFAULT_RULER_COLOR,
+      ruler: {
+        color: DEFAULT_RULER_COLOR,
+        visible: true,
+      },
     },
     layersOrder: [initialLayer.id],
     framesOrder: [initialFrame.id],
@@ -82,5 +90,8 @@ export const initDataBase = (options?: { example?: boolean; size?: Size }): Data
     pressing: false,
     activeGridIndex: -1,
     activeSurfaceId: initialSurface.id,
+    animationConfig: {
+      interval: DEFAULT_ANIMATION_INTERVAL,
+    },
   }
 }

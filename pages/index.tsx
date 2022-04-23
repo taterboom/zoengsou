@@ -6,7 +6,7 @@ const App = dynamic(() => import("../components/App"), { ssr: false })
 
 const Home: NextPage = () => {
   return (
-    <div className="flex justify-center items-center w-screen h-screen">
+    <div>
       <Head>
         <meta
           name="viewport"

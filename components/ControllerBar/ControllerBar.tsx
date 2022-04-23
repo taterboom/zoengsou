@@ -1,20 +1,38 @@
 import useStore from "../../store/editorStore/store"
-import Button from "../Button"
+import Button from "../UI/Button"
 import classnames from "classnames"
 import { selectActiveSurface } from "../../store/editorStore/selectors"
+import EditorComponentWrapper from "../EditorComponentWrapper"
 
 const Header: React.FC = () => {
   const framesOrder = useStore((state) => state.framesOrder)
   const activeSurface = useStore(selectActiveSurface)
+  const addLayer = useStore((state) => state.addLayer)
+  const addFrame = useStore((state) => state.addFrame)
   return (
     <header className="flex">
-      <div className="w-[200px]">control</div>
-      <div>
+      <div className="w-[200px]">
+        <Button
+          onClick={() => {
+            addLayer()
+          }}
+        >
+          +
+        </Button>
+      </div>
+      <div className="flex">
         {framesOrder.map((id) => (
           <div key={id} className={classnames({ border: activeSurface.frameId === id })}>
             {id}
           </div>
         ))}
+        <Button
+          onClick={() => {
+            addFrame()
+          }}
+        >
+          +
+        </Button>
       </div>
     </header>
   )
@@ -23,7 +41,6 @@ const Header: React.FC = () => {
 const Layers: React.FC = () => {
   const layersOrder = useStore((state) => state.layersOrder)
   const activeSurface = useStore(selectActiveSurface)
-  const addLayer = useStore((state) => state.addLayer)
   return (
     <aside className="w-[200px]">
       {layersOrder.map((id) => (
@@ -31,13 +48,6 @@ const Layers: React.FC = () => {
           {id}
         </div>
       ))}
-      <Button
-        onClick={() => {
-          addLayer()
-        }}
-      >
-        +
-      </Button>
     </aside>
   )
 }
@@ -77,12 +87,16 @@ const Body: React.FC = () => {
   )
 }
 
-const ControllerBar: React.FC = () => {
+const ControllerBar: React.FC<{ active: boolean }> = ({ active }) => {
   return (
-    <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-[800px] h-[200px] bg-white">
-      <Header></Header>
-      <Body></Body>
-    </div>
+    <EditorComponentWrapper active={active} direction="top">
+      <div className="fixed bottom-0 left-0 w-full flex justify-center">
+        <div className="w-[800px] h-[200px] bg-white">
+          <Header></Header>
+          <Body></Body>
+        </div>
+      </div>
+    </EditorComponentWrapper>
   )
 }
 
