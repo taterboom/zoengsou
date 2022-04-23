@@ -1,6 +1,7 @@
 import EditorComponentWrapper from "../EditorComponentWrapper"
 import AnimationExporter from "../Exporter/AnimationExporter"
 import ImgExporter from "../Exporter/ImgExporter"
+import SvgExporter from "../Exporter/SvgExporter"
 import HandBook from "../Handbook"
 
 const MenuBar: React.FC<{ active: boolean }> = ({ active }) => {
@@ -10,6 +11,7 @@ const MenuBar: React.FC<{ active: boolean }> = ({ active }) => {
         <div className="w-[800px] h-12 bg-white">
           <ImgExporter></ImgExporter>
           <AnimationExporter></AnimationExporter>
+          <SvgExporter></SvgExporter>
           <HandBook></HandBook>
         </div>
       </div>

@@ -16,8 +16,8 @@ const useImgExporter = (type: string) => {
     const ctx = canvasEl.getContext("2d")
     const imageData = ctx?.getImageData(0, 0, metaData.size.width, metaData.size.height)
     if (!imageData) return
-    for (let index = 0; index < activeFrame.surfacesOrder.length; index++) {
-      const surface = surfaceStore[activeFrame.surfacesOrder[index]]
+    for (let surfaceId of [...activeFrame.surfacesOrder].reverse()) {
+      const surface = surfaceStore[surfaceId]
       for (let i = 0; i < metaData.size.height; i++) {
         for (let j = 0; j < metaData.size.height; j++) {
           const color = surface.grids[i * metaData.size.width + j]
