@@ -87,7 +87,6 @@ export const initDataBase = (options?: { example?: boolean; size?: Size }): Data
     surfaceStore: {
       [initialSurface.id]: initialSurface,
     },
-    pressing: false,
     activeGridIndex: -1,
     activeSurfaceId: initialSurface.id,
     animationConfig: {

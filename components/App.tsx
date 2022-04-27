@@ -9,6 +9,7 @@ import Inspect from "./Inspect"
 import KeyBindings from "./KeyBindings"
 import ScaleKeyBindings from "./ScaleKeyBindings"
 import { useState } from "react"
+import BaseKeyBindings from "./BaseKeyBindings"
 
 const App: React.FC = () => {
   const [isSimpleMode, setIsSimpleMode] = useState(false)
@@ -27,6 +28,7 @@ const App: React.FC = () => {
     <div>
       <Canvas></Canvas>
       <KeyBindings></KeyBindings>
+      <BaseKeyBindings></BaseKeyBindings>
       <ScaleKeyBindings></ScaleKeyBindings>
       <MenuBar active={!isSimpleMode}></MenuBar>
       <ToolBar active={!isSimpleMode}></ToolBar>

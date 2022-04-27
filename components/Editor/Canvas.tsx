@@ -4,6 +4,7 @@ import useStore from "../../store/editorStore"
 import { DataBase } from "../../store/editorStore/store"
 import shallow from "zustand/shallow"
 import { fillRectImageData } from "../../utils/imageHelper"
+import useUIStore from "../../store/ui/store"
 
 const RulerCanvas: React.FC = () => {
   const rulerCanvasRef = useRef<HTMLCanvasElement>(null)
@@ -70,7 +71,7 @@ const MainCanvas: React.FC = () => {
   const mainCanvasRef = useRef<HTMLCanvasElement>(null)
   const metaData = useStore(selectMetaData)
   const updateActiveGridIndexRef = useRef(useStore((store) => store.updateActiveGridIndex))
-  const updatePressingRef = useRef(useStore((store) => store.updatePressing))
+  const updatePressingRef = useRef(useUIStore((store) => store.updatePressing))
 
   const draw = useCallback(
     (

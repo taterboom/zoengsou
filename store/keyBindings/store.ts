@@ -34,6 +34,6 @@ const store = combine(
   })
 )
 
-const useKeyBindingsStore = create(log(store))
+const useKeyBindingsStore = create(store)
 
 export default useKeyBindingsStore

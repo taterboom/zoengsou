@@ -6,6 +6,7 @@ import usePaletteStore from "../../store/palette/store"
 import Button from "../UI/Button"
 import EditorComponentWrapper from "../EditorComponentWrapper"
 import ColorPicker from "../UI/ColorPicker"
+import useUIStore from "../../store/ui/store"
 
 const setCursor = (cursor: string) => {
   const stageContainer = document.getElementById("stage-container")
@@ -42,6 +43,7 @@ const ToolButtonGrab: React.FC<ToolButtonProps> = ({ checked, onClick }) => {
     const onMouseup = () => {
       if (checkedRef.current) {
         setCursor("grab")
+        useStore.getState().snapshot?.()
       }
       stageContainer.removeEventListener("mousemove", onMousemove)
       document.removeEventListener("mouseup", onMouseup)
@@ -67,14 +69,11 @@ const ToolButtonPencel: React.FC<ToolButtonProps> = ({ checked, onClick }) => {
   checkedRef.current = checked
 
   useEffect(() => {
-    return useStore.subscribe(
-      (state) => ({
-        pressing: state.pressing,
-        activeGridIndex: state.activeGridIndex,
-      }),
-      ({ pressing, activeGridIndex }) => {
+    const unsubscribeUI = useUIStore.subscribe(
+      (state) => ({ pressing: state.pressing }),
+      ({ pressing }) => {
         if (!checkedRef.current) return
-        if (pressing && activeGridIndex >= 0) {
+        if (useUIStore.getState().pressing && useStore.getState().activeGridIndex >= 0) {
           updateActiveGridRef.current(usePaletteStore.getState().color)
         }
       },
@@ -82,6 +81,24 @@ const ToolButtonPencel: React.FC<ToolButtonProps> = ({ checked, onClick }) => {
         equalityFn: shallow,
       }
     )
+    const unsubscribeEditor = useStore.subscribe(
+      (state) => ({
+        activeGridIndex: state.activeGridIndex,
+      }),
+      ({ activeGridIndex }) => {
+        if (!checkedRef.current) return
+        if (useUIStore.getState().pressing && activeGridIndex >= 0) {
+          updateActiveGridRef.current(usePaletteStore.getState().color)
+        }
+      },
+      {
+        equalityFn: shallow,
+      }
+    )
+    return () => {
+      unsubscribeUI()
+      unsubscribeEditor()
+    }
   }, [])
 
   return <Button onClick={onClick}>Pencil {checked + ""}</Button>
@@ -95,12 +112,11 @@ const ToolButtonEraser: React.FC<ToolButtonProps> = ({ checked, onClick }) => {
   useEffect(() => {
     return useStore.subscribe(
       (state) => ({
-        pressing: state.pressing,
         activeGridIndex: state.activeGridIndex,
       }),
-      ({ pressing, activeGridIndex }) => {
+      ({ activeGridIndex }) => {
         if (!checkedRef.current) return
-        if (pressing && activeGridIndex >= 0) {
+        if (useUIStore.getState().pressing && activeGridIndex >= 0) {
           updateActiveGridRef.current(null)
         }
       },
@@ -119,7 +135,7 @@ const ToolButtonFill: React.FC<ToolButtonProps> = ({ checked, onClick }) => {
   checkedRef.current = checked
 
   useEffect(() => {
-    return useStore.subscribe(
+    return useUIStore.subscribe(
       (state) => state.pressing,
       (pressing) => {
         if (!checkedRef.current) return

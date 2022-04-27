@@ -16,6 +16,6 @@ const store = combine(
   })
 )
 
-const usePaletteStore = create(log(store))
+const usePaletteStore = create(store)
 
 export default usePaletteStore
